@@ -1,0 +1,50 @@
+version: '3.4'
+
+networks:
+  backend:
+
+services:
+  mealmatchdb:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Passw0rd"
+    networks:
+     - backend
+
+  productapi:
+    image: ${DOCKER_REGISTRY-}productapi
+    build:
+      context: .
+      dockerfile: Product.API/Dockerfile
+    depends_on:
+      - mealmatchdb
+    environment:
+      ConnectionStrings__Database: "Data Source=mealmatchdb;Initial Catalog=MealMatch_ms;User ID=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True; Connect Timeout=30; Encrypt=false"
+    networks:
+     - backend
+
+  recipeapi:
+    image: ${DOCKER_REGISTRY-}recipeapi
+    build:
+      context: .
+      dockerfile: RecipeAPI/Dockerfile
+    depends_on:
+      - mealmatchdb
+    environment:
+      ConnectionStrings__Database: "Data Source=mealmatchdb;Initial Catalog=MealMatch_ms;User ID=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True; Connect Timeout=30; Encrypt=false"
+    networks:
+     - backend
+
+  userapi:
+    image: ${DOCKER_REGISTRY-}userapi
+    build:
+      context: .
+      dockerfile: UserAPI/Dockerfile
+    depends_on:
+      - mealmatchdb
+    environment:
+      ConnectionStrings__Database: "Data Source=mealmatchdb;Initial Catalog=MealMatch_ms;User ID=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True; Connect Timeout=30; Encrypt=false"
+    networks:
+     - backend
